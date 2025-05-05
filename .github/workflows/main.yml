@@ -43,7 +43,7 @@ jobs:
 
       # Step 5: Upload drm-loopback artifact
       - name: Upload drm-loopback artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v4
         with:
           name: drm-loopback-artifact
           path: build/*
