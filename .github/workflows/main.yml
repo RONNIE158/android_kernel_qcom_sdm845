@@ -1,0 +1,42 @@
+name: Build lindroid-drm-loopback module
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-module:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout kernel source
+      uses: actions/checkout@v3
+      with:
+        repository: RONNIE158/android_kernel_xiaomi_sdm845
+        ref: lineage-21
+        path: kernel
+
+    - name: Clone lindroid-drm-loopback
+      run: |
+        git clone https://github.com/Linux-on-droid/lindroid-drm-loopback module-lindroid
+
+    - name: Setup toolchain
+      run: |
+        mkdir -p toolchain
+        curl -LO https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/heads/master.tar.gz
+        tar -xzf master.tar.gz -C toolchain
+      shell: bash
+
+    - name: Build kernel module
+      run: |
+        export ARCH=arm64
+        export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-
+        export KERNELDIR=$GITHUB_WORKSPACE/kernel
+
+        make -C $KERNELDIR M=$GITHUB_WORKSPACE/module-lindroid modules
+      shell: bash
+
+    - name: Upload built module
+      uses: actions/upload-artifact@v3
+      with:
+        name: lindroid-drm-loopback.ko
+        path: module-lindroid/drm-loopback.ko
