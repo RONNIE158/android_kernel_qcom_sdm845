@@ -3,10 +3,10 @@ name: Build DRM Loopback
 on:
   push:
     branches:
-      - main
+      - main  # Pastikan ini sesuai dengan branch kamu
   pull_request:
     branches:
-      - main
+      - main  # Pastikan ini sesuai dengan branch kamu
 
 jobs:
   build_drm_loopback:
@@ -25,11 +25,9 @@ jobs:
                              libevdev-dev libpciaccess-dev libudev-dev \
                              pkg-config meson ninja-build
 
-      # Step 3: Set up toolchain (optional, bisa gunakan toolchain lain yang kamu sebutkan)
+      # Step 3: Set up toolchain (optional, sesuaikan dengan toolchain yang kamu pilih)
       - name: Set up toolchain
         run: |
-          # Jika kamu menggunakan toolchain lain (misalnya, toolchain dari Android)
-          # Kamu bisa mendownload dan mengonfigurasi toolchain sesuai kebutuhan
           wget https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_64_toolchain/releases/download/clang-16.0.2/clang-16.0.2-linux-x86_64.tar.xz
           tar -xvJf clang-16.0.2-linux-x86_64.tar.xz
           export PATH=$PWD/clang-16.0.2-linux-x86_64/bin:$PATH
