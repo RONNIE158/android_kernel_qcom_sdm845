@@ -1,42 +1,54 @@
-name: Build lindroid-drm-loopback module
+name: Build DRM Loopback
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build-module:
+  build_drm_loopback:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout kernel source
-      uses: actions/checkout@v3
-      with:
-        repository: RONNIE158/android_kernel_xiaomi_sdm845
-        ref: lineage-21
-        path: kernel
+      # Step 1: Checkout source code
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-    - name: Clone lindroid-drm-loopback
-      run: |
-        git clone https://github.com/Linux-on-droid/lindroid-drm-loopback module-lindroid
+      # Step 2: Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential libdrm-dev libdrm-ast-dev \
+                             libevdev-dev libpciaccess-dev libudev-dev \
+                             pkg-config meson ninja-build
 
-    - name: Setup toolchain
-      run: |
-        mkdir -p toolchain
-        curl -LO https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/heads/master.tar.gz
-        tar -xzf master.tar.gz -C toolchain
-      shell: bash
+      # Step 3: Set up toolchain (optional, bisa gunakan toolchain lain yang kamu sebutkan)
+      - name: Set up toolchain
+        run: |
+          # Jika kamu menggunakan toolchain lain (misalnya, toolchain dari Android)
+          # Kamu bisa mendownload dan mengonfigurasi toolchain sesuai kebutuhan
+          wget https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_64_toolchain/releases/download/clang-16.0.2/clang-16.0.2-linux-x86_64.tar.xz
+          tar -xvJf clang-16.0.2-linux-x86_64.tar.xz
+          export PATH=$PWD/clang-16.0.2-linux-x86_64/bin:$PATH
 
-    - name: Build kernel module
-      run: |
-        export ARCH=arm64
-        export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-
-        export KERNELDIR=$GITHUB_WORKSPACE/kernel
+      # Step 4: Build drm-loopback
+      - name: Build drm-loopback
+        run: |
+          cd drm-loopback
+          meson setup build
+          ninja -C build
 
-        make -C $KERNELDIR M=$GITHUB_WORKSPACE/module-lindroid modules
-      shell: bash
+      # Step 5: Upload drm-loopback artifact
+      - name: Upload drm-loopback artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: drm-loopback-artifact
+          path: build/*
 
-    - name: Upload built module
-      uses: actions/upload-artifact@v3
-      with:
-        name: lindroid-drm-loopback.ko
-        path: module-lindroid/drm-loopback.ko
+      # Optional: Clean up build files
+      - name: Clean up
+        run: |
+          rm -rf build
