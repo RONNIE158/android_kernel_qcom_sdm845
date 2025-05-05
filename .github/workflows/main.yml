@@ -1,12 +1,12 @@
 name: Build DRM Loopback
 
 on:
-  push:
-    branches:
-      - main  # Pastikan ini sesuai dengan branch kamu
-  pull_request:
-    branches:
-      - main  # Pastikan ini sesuai dengan branch kamu
+  workflow_dispatch:   # Ini memungkinkan kamu menjalankan workflow secara manual
+    inputs:
+      build_type:
+        description: 'Type of build (e.g., release or debug)'
+        required: true
+        default: 'release'
 
 jobs:
   build_drm_loopback:
